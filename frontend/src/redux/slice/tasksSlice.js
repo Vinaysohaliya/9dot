@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
+import axiosInstance from '../../Helpers/axiosInstances';
 
 const loadFromLocalStorage = () => {
   const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
@@ -20,7 +21,7 @@ const initialState = loadFromLocalStorage();
 
 export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/tasks');
+    const response = await axiosInstance.get('tasks/');
     return response.data;
   } catch (error) {
     toast.error('Failed to fetch tasks!');
@@ -30,7 +31,7 @@ export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async () => {
 
 export const addTask = createAsyncThunk('tasks/addTask', async (taskData, { rejectWithValue }) => {
   try {
-    const response = await axios.post('http://localhost:5000/api/tasks', taskData);
+    const response = await axiosInstance.post('tasks/', taskData);
     toast.success('Task added successfully!');
     return response.data;
   } catch (error) {
@@ -41,7 +42,7 @@ export const addTask = createAsyncThunk('tasks/addTask', async (taskData, { reje
 
 export const updateTask = createAsyncThunk('tasks/updateTask', async ({ id, updatedData }, { rejectWithValue }) => {
   try {
-    const response = await axios.put(`http://localhost:5000/api/tasks/${id}`, updatedData);
+    const response = await axiosInstance.put(`tasks/${id}`, updatedData);
     toast.success('Task updated successfully!');
     return response.data;
   } catch (error) {
@@ -52,7 +53,7 @@ export const updateTask = createAsyncThunk('tasks/updateTask', async ({ id, upda
 
 export const deleteTask = createAsyncThunk('tasks/deleteTask', async (id, { rejectWithValue }) => {
   try {
-    await axios.delete(`http://localhost:5000/api/tasks/${id}`);
+    await axiosInstance.delete(`tasks/${id}`);
     toast.success('Task deleted successfully!');
     return id;
   } catch (error) {
