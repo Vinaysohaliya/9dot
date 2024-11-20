@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 const loadFromLocalStorage = () => {
   const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
@@ -14,25 +15,52 @@ const saveToLocalStorage = (tasks, filterStatus) => {
 
 const initialState = loadFromLocalStorage();
 
+
+
+
 export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async () => {
-  const response = await axios.get('http://localhost:5000/api/tasks'); 
-  return response.data;
+  try {
+    const response = await axios.get('http://localhost:5000/api/tasks');
+    return response.data;
+  } catch (error) {
+    toast.error('Failed to fetch tasks!');
+    throw error;  
+  }
 });
 
-export const addTask = createAsyncThunk('tasks/addTask', async (taskData) => {
-  const response = await axios.post('http://localhost:5000/api/tasks', taskData);
-  return response.data;
+export const addTask = createAsyncThunk('tasks/addTask', async (taskData, { rejectWithValue }) => {
+  try {
+    const response = await axios.post('http://localhost:5000/api/tasks', taskData);
+    toast.success('Task added successfully!');
+    return response.data;
+  } catch (error) {
+    toast.error('Failed to add task!');
+    return rejectWithValue(error.message);  
+  }
 });
 
-export const updateTask = createAsyncThunk('tasks/updateTask', async ({ id, updatedData }) => {
-  const response = await axios.put(`http://localhost:5000/api/tasks/${id}`, updatedData);
-  return response.data;
+export const updateTask = createAsyncThunk('tasks/updateTask', async ({ id, updatedData }, { rejectWithValue }) => {
+  try {
+    const response = await axios.put(`http://localhost:5000/api/tasks/${id}`, updatedData);
+    toast.success('Task updated successfully!');
+    return response.data;
+  } catch (error) {
+    toast.error('Failed to update task!');
+    return rejectWithValue(error.message);
+  }
 });
 
-export const deleteTask = createAsyncThunk('tasks/deleteTask', async (id) => {
-  await axios.delete(`http://localhost:5000/api/tasks/${id}`);
-  return id;
+export const deleteTask = createAsyncThunk('tasks/deleteTask', async (id, { rejectWithValue }) => {
+  try {
+    await axios.delete(`http://localhost:5000/api/tasks/${id}`);
+    toast.success('Task deleted successfully!');
+    return id;
+  } catch (error) {
+    toast.error('Failed to delete task!');
+    return rejectWithValue(error.message);
+  }
 });
+
 
 const tasksSlice = createSlice({
   name: 'tasks',
